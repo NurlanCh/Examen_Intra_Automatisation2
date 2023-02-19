@@ -1,75 +1,95 @@
 *** Settings ***
 Library     SeleniumLibrary
-Test Setup    Je suis sur la page d'accueil d'Ebay
-Test Teardown    Close Browser
+Library    XML
+Variables    ./locators.py
 
 *** Variables ***
 ${URL}    https://www.ebay.com/
 ${BROWSER}    chrome
-@{List_Categories}    Antiques    Art    Baby    Books&Magazines    Business&Industrial    Cameras&Photos     
+${url_obtenue}
 
 *** Keywords ***
 Je suis sur la page d'accueil d'Ebay
     Open Browser    ${URL}    ${BROWSER}
     Maximize Browser Window
+    Set Selenium Timeout    5
     
 Je clique sur lien Avancé
-    Wait Until Element Is Visible    xpath://a[@title='Advanced Search' and @id='gh-as-a']
-    Click Element    xpath://a[@title='Advanced Search' and @id='gh-as-a']
+    Wait Until Element Is Visible    ${lnk_Advanced}
+    Click Element    ${lnk_Advanced}
 
 Je navigue vers la page Recherche avancée
-    #Set Selenium Timeout    5
-    Wait Until Page Contains    Advanced search
-    Page Should Contain    Advanced search
+    [Arguments]    ${Labeled_text}
+    Wait Until Page Contains    ${Labeled_text}
+    Page Should Contain    ${Labeled_text}
    
 Je recherche'iPhone11'
-    Wait Until Element Is Visible    xpath://div[@id='gh-ac-box']
-    Input Text    xpath://input[@id='gh-ac']    iPhone 11
-    Click Button    //input[@type='submit' and @id='gh-btn']
-    Wait Until Page Contains    results for iPhone 11
+    [Arguments]    ${var_iPhone11}    ${result_B}
+    Wait Until Element Is Visible    ${txt_Search}
+    Input Text    ${txt_Search}    ${var_iPhone11}
+    Click Button    ${btn_Search}
+    Wait Until Page Contains    ${result_B}
 
 Je valide au moins 1000 éléments de recherche présents
-    ${Number}=    Get Text    css:div[class='srp-controls__control srp-controls__count'] span:nth-child(1)
-    IF    ${Number} > 1000
-        Log To Console    Plus 1000 elements de recherche presents
+    [Arguments]    ${Quantity_B}
+    ${Number_1}=    Get Text    ${lbl_Resultat_Quantite}
+    IF    ${Number_1} > ${Quantity_B}
+        Log To Console    Plus ${Quantity_B} elements de recherche presents
     ELSE
-        ${Number} < 1000
-        Log To Console    C'est moins de 1000 elements de recherche presents
+        ${Number_1} < ${Quantity_B}
+        Log To Console    C'est moins de ${Quantity_B} elements de recherche presents
     END
 
 Je recherche 'Toy Cars'
-    Wait Until Element Is Visible    xpath://div[@id='gh-ac-box']
-    Input Text    xpath://input[@id='gh-ac']    Toy Cars
-    Click Button    //input[@type='submit' and @id='gh-btn']
-    Wait Until Page Contains    results for Toy Cars
+    [Arguments]    ${var_ToyCars}    ${result_C}
+    Wait Until Element Is Visible    ${txt_Search}
+    Input Text    ${txt_Search}    ${var_ToyCars}
+    Click Button    ${btn_Search}
+    Wait Until Page Contains    ${result_C}
 
 Je valide au moins 100 éléments de recherche présents
-    ${Number}=    Get Text    xpath:/html[1]/body[1]/div[8]/div[4]/div[1]/div[1]/div[2]/div[1]/div[1]/h1[1]/span[1]
-    IF    ${Number} > 100
-        Log To Console    Plus 100 elements de recherche presents
+    [Arguments]    ${Quantity_C}
+    ${Number_2}=    Get Text    ${lbl_Resultat_Quantite}
+    IF    ${Number_2} > ${Quantity_C}
+        Log To Console    Plus ${Quantity_C} elements de recherche presents
     ELSE
-        ${Number} < 100
-        Log To Console    C'est moins de 100 elements de recherche presents
+        ${Number_2} < ${Quantity_C}
+        Log To Console    C'est moins de ${Quantity_C} elements de recherche presents
     END
 Je recherche 'soap' dans la catégorie 'Baby'
-    Wait Until Element Is Visible    xpath://div[@id='gh-ac-box']
-    Input Text    xpath://input[@id='gh-ac']    soap
-    Select From List By Label    xpath://select[@id='gh-cat']    Baby
-    Sleep    3
-    ${Categorie_Baby}=    Get Selected List Label    xpath://select[@id='gh-cat']
-    Click Button    //input[@type='submit' and @id='gh-btn']
-    Wait Until Page Contains    results for soap
+    [Arguments]    ${var_soap}    ${var_Baby}    ${result_D}
+    Wait Until Element Is Visible    ${txt_Search}
+    Input Text    ${txt_Search}    ${var_soap}
+    Select From List By Label    ${lst_Category}    ${var_Baby}
+    Click Button    ${btn_Search}
+    Wait Until Page Contains    ${result_D}
 
 Je valide au moins 50 éléments de recherche présents
-    ${Number}=    Get Text        css:div[class='srp-controls__control srp-controls__count'] span:nth-child(1)
-    IF    ${Number} > 50
-        Log To Console    Plus 50 elements de recherche presents
+    [Arguments]    ${Quantity_D}
+    ${Number_3}=    Get Text    ${lbl_Resultat_Scenario_D}
+    IF    ${Number_3} > ${Quantity_D}
+        Log To Console    Plus ${Quantity_D} elements de recherche presents
     ELSE
-        ${Number} < 50
-        Log To Console    C'est moins de 50 elements de recherche presents
+        ${Number_3} < ${Quantity_D}
+        Log To Console    C'est moins de ${Quantity_D} elements de recherche presents
     END
 
 Je clique sur '<link>'
-
-
+    [Arguments]    ${name_Category}
+    Click Element    ${lnk_Category_partie_1}${name_Category}${lnk_Category_partie_2}
+    Wait Until Page Contains    ${name_Category}
+    
 Je valide que la page navigue vers '<url>' et que le titre contient '<title>'
+    [Arguments]        ${var}    ${name_Category}
+    ${url_obtenue}=    Get Location  
+    Location Should Contain    https://www.ebay.com/b/${var}
+    Should Match Regexp    ${url_obtenue}      https://www.ebay.com/b/${var}
+    Log To Console    ${var} 
+    Log To Console    ${url_obtenue}   
+      
+    ${titre_obtenue}=    Get Title
+    Should Match Regexp    ${titre_obtenue}    ${name_Category}
+    Log To Console    ${titre_obtenue}
+        
+    
+   
